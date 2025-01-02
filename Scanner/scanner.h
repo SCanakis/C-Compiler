@@ -3,14 +3,22 @@
 
 
 typedef enum {
-	TOK_INT, // int
-	TOK_RETURN, //  return
-	TOK_IF,	// if
-	TOK_ELSE, // else
+	TOK_INT, // keyword: int
+	TOK_FLOAT, // keyword: floats
+	TOK_RETURN, //  keyword: return
+	TOK_IF,	// keyword: if
+	TOK_ELSE, // keyword: else
+	TOK_FOR, // keyword: for
+	TOK_WHILE, // keyword: while 
 	TOK_IDENTIFIER, // x, myFunction
-	TOK_NUMBER, // 123, 2.1
+	TOK_INT_NUMBER, // 123
+	TOK_FLOAT_NUMBER, // 1.23
 	TOK_ASSIGN, // =
 	TOK_EQ, // == 
+	TOK_LT, // <
+	TOK_GT,	// >
+	TOK_LTE, // <=
+	TOK_GTE, // >=
 	TOK_PLUS, // +
 	TOK_MINUS, // -
 	TOK_STAR, // *
@@ -28,15 +36,16 @@ typedef enum {
 
 typedef struct token_s {
 	tokenType type;
-	char *lexemel;
+	char *lexeme;
 	int line;
 	int col;
 	int intValue;
+	float floatValue;
 } token_t;
 
 
 
-token_t getNextToken();
+token_t *getNextToken();
 
 void initScanner(const char *filename);
 
