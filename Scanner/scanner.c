@@ -12,7 +12,7 @@ static int line = 1; // Current line number
 static int column = 0; // Current column number
 static int length = 0; // Current column number
 
-
+// Skips to next line updating col, line, and pos
 void skipToNextLine() {
 
 	while(source[pos] != '\n') {
@@ -25,6 +25,7 @@ void skipToNextLine() {
 }
 
 
+// Gets next non-whitesapce character
 char getNextChar() {
 	char currChar = source[pos];
 	pos++;
@@ -49,8 +50,10 @@ char getNextChar() {
 		}
 		currChar = source[pos];
 	}
+
 	return currChar;
 }
+
 
 // Skips to next line without affecting col or line
 int skipFakeLine(int tempPos) {
@@ -91,35 +94,105 @@ char peekNextChar() {
 
 }
 
-token_t getNextToken() {
 
-	char currChar = getNextChar(); 
+// Gets the float based on string
+float getFloat(int currInt, int totalInt) {
+	// Casting int into floats
+	float totalFloat = (float)totalInt + (float) currInt;
+	float currFloat= 0;
+	int decimalCount = 0;
+
+	getNextChar();
+
+	while(isdigit(peekNextChar())) {
+		decimalCount++;
+		currFloat = atoi(getNextChar());
+		totalFloat += currFloat * (10 ** -(decimalCount));
+	}
+	return totalFloat;
+
+}
+
+// Allocates Memory for Lexeme and copys string.
+char* createLexeme(int initalPos) {
+	char * lexeme = (char *) malloc(pos-initalPos-1);
+	
+	if(lexeme == NULL) {
+		perror("Could not allocate enough memory for string. Error occured in line: %d , column: %d. \n", line, col);
+		exit(EXIT_FAILURE);
+	}
+
+	strncpy(lexeme, source + initalPos,(size_t) (pos - initialPos));
+	return lexeme;
+}
+
+// Sets Line and Column of Token
+void setLC(token_t **tokenArg) {
+	token_t *token = *tokenArg;
+	token->col = col;
+	token->line = line;
+}
+
+
+// Helper function to get indentifiers and KeyWords
+void identifiersAndKeyWords(token_t **tokenArg) {
+
+
+}
+
+token_t getNextToken() {
+	
+	int initalPos = pos;
+
+	// Allocates Memory and Error handling
+	token_t *token = (token_t *) malloc(sizeof(token_t));
+	
+	if(token == NULL) {
+		perror("Could not allocated memory for token");
+		exit(EXIT_FAILURE);
+	}
+
+	char currChar = getNextChar(&currentPos); 
+
 
 	// Checks whether currChar is a digits or currChar is 
 	if(isdigit(currChar)) {
+
 		int currInt = atoi(&currChar);
 		int totalInt = 0;
-		double totalDouble = 0;
-		double currDouble = 0;
+
+		// Iterates until number ends 
 		while(isdigit(peekNextChar()) || peekNextChar() == '.' ) {
 			
+			// Handles numbers higher than 9
 			if(isdigit(peekNextChar())) {
 				total = total * 10 +  currInt;
 				currInt = atoi(getNextChar());
 			} else {
 				// Handle Deciamls
+				token->floatValue = getFloat(currInt, totalInt);
+				token->type = TOK_FLOAT_NUMBER;
+				setLC(&token);
+				return token;	
 			}
 
 		}	
+		// Handles Integers
+		total = total * 10 + currInt;
+		token->intValue = totalInt;
+		token->type = TOK_INT_NUMBER;
+		setLC(&token);
+		return token;
 
+	// This section should chekc for: Identifiers and Keywords 
+	} else if (isalpha(currChar) || currChar == '_') {
 	
-	} else if (isalpha(currChar)) {
+		
 
 	} else {
 		checkForSymbols();
 		checkForOperators();
 	}
-
 
 	return NULL;
 }
