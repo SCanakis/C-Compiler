@@ -26,6 +26,7 @@ char skipToNextLine() {
 	return source[pos];
 }
 
+// Converts tokenType to Strings
 char * printType(tokenType type) {
 	switch(type) {
 
@@ -66,12 +67,13 @@ char getNextChar() {
 	pos++;
 	column++;
 
-	// Checks for whitespace or next line
+	// Checks for whitespace, next line or comments
 	while(isspace(currChar) || currChar == '\n' || currChar == '/' ) {
+		// Handles EOF
 		if(currChar == EOF || currChar == -1) {
 			return EOF;
 		}
-		//printf("skipping smth\n");		
+		
 		// Handles Comments
 		if(currChar == '/' && source[pos] == '/') {
 			currChar = skipToNextLine();
@@ -87,14 +89,13 @@ char getNextChar() {
 			column++;
 		}
 	}
-	//printf("getting next char: %c \t pos = %d\n", currChar, (int)pos -1);
+	
 	return currChar;
 }
 
 
 // Skips to next line without affecting col or line
 int skipFakeLine(int tempPos) {
-	//printf("skipping line fakei\n");
 	while(source[tempPos] != '\n') {
 		tempPos++;
 	}
@@ -109,8 +110,12 @@ char peekNextChar() {
 	char currChar = source[tempPos];
 	tempPos++;
 
-	// Checks for whitespace or next line
+	// Checks for whitespace, next line, or comments 
 	while(isspace(currChar) || currChar == '\n' || currChar == '/' ) {
+		// Handles EOF	
+		if(currChar == EOF || currChar == -1) {
+			return EOF;
+		}
 		
 		// Handles Comments
 		if(currChar == '/' && source[pos] == '/') {
@@ -136,12 +141,12 @@ char peekNextChar() {
 // Gets the float based on string
 float getFloat(int currInt, int totalInt) {
 	// Casting int into floats
-	// printf("getting float\n");
 	float totalFloat = (float)totalInt + (float) currInt;
 	float currFloat= 0;
 	int decimalCount = 0;
-
+	
 	getNextChar();
+
 
 	while(isdigit(peekNextChar())) {
 		decimalCount++;
@@ -154,7 +159,8 @@ float getFloat(int currInt, int totalInt) {
 
 // Allocates Memory for Lexeme and copys string.
 char* createLexeme(int initalPos) {
-	//printf("creating lexeme\n");
+	
+	// Length is used to allocted memory for lexeme + error handeling
 	size_t length = pos - initalPos;
 	char * lexeme = (char *) malloc((int)length+1);
 	
@@ -162,14 +168,18 @@ char* createLexeme(int initalPos) {
 		perror("Could not allocate enough memory for string.");
 		exit(EXIT_FAILURE);
 	}
+
+	// Copy string from source to lexeme
 	strncpy(lexeme, source + initalPos, length);
 	lexeme[length] = '\0';
 	return lexeme;
 }
 
+
 // Sets Line and Column of Token
 token_t *createToken(tokenType type, int initialPos) {
-	//printf("creating token\n");
+	
+	// Allocates Memory for token + error handeling
 	token_t *token = (token_t*) malloc(sizeof(token_t));
 	if(token == NULL) {
 		perror("Could not allocated memory for token");
@@ -189,8 +199,8 @@ token_t *createToken(tokenType type, int initialPos) {
 }
 
 
-
-int  enumMap(tokenType type) {
+// Map for keywords and their lengths
+int keywordMap(tokenType type) {
 
 	switch(type) {
 		// Should be a space in between this and another character
@@ -211,13 +221,12 @@ int  enumMap(tokenType type) {
 
 
 
-
+// Checks whether current pos pointer contains keywords 
 tokenType checkForKeyWords() {
-	//printf("checking for keywords\n");
+	
 	char *positionPtr = source + pos - 1;
-	//printf("%s\n", positionPtr);
-	//printf("%d\n", strncmp(positionPtr, "int ",4) == 0);
 	int length;
+	// Require a space between the keyword and another character
 	if(strncmp(positionPtr, "int ",4) == 0) {
 		return TOK_INT;
 	}
@@ -227,38 +236,44 @@ tokenType checkForKeyWords() {
 	if(strncmp(positionPtr, "float ", 6) == 0) {
 		return TOK_FLOAT;
 	}
+
+
+	// Keyword can have a non-alpha character next to it
+	// Uses keywordMap to get length
+	// Checks if pos+length-1 is alphabetical if so returns null
+	
 	if(strncmp(positionPtr, "return", 6) == 0) {
-		length = enumMap(TOK_RETURN);
+		length = keywordMap(TOK_RETURN);
 		if (isalpha(source[pos+length-1])) {
-			return (tokenType) NULL;
+			return TOK_ERROR;
 		}	
 		return TOK_RETURN;
 	}
 	if(strncmp(positionPtr, "if", 2) == 0) {
-		length = enumMap(TOK_IF);
+		length = keywordMap(TOK_IF);
 		if (isalpha(source[pos+length-1])) {
-			return (tokenType) NULL;
+			return TOK_ERROR;
 		}	
 		return TOK_IF;
 	}
 	if(strncmp(positionPtr, "else", 4) == 0) {
-		length = enumMap(TOK_ELSE);
+		length = keywordMap(TOK_ELSE);
 		if (isalpha(source[pos+length-1])) {
-			return (tokenType) NULL;
+			return TOK_ERROR;
 		}	
 		return TOK_ELSE;
 	}
 	if(strncmp(positionPtr, "for", 3) == 0) {
-		length = enumMap(TOK_FOR);
+		length = keywordMap(TOK_FOR);
 		if (isalpha(source[pos+length-1])) {
-			return (tokenType) NULL;
+			return TOK_ERROR;
 		}
 		return TOK_FOR;
 	}
 	if(strncmp(positionPtr, "while", 5) == 0) {
-		length = enumMap(TOK_WHILE);
+		length = keywordMap(TOK_WHILE);
 		if (isalpha(source[pos+length-1])) {
-			return (tokenType) NULL;
+			return TOK_ERROR;
 		}	
 		return TOK_WHILE;
 	} else {
@@ -267,10 +282,9 @@ tokenType checkForKeyWords() {
 }
 
 
-
+// Checks for symbols such as: () {} ; ,
 tokenType checkForSymbols() {
 
-	//printf("checking for symbols\n");
 	char *positionPtr = source + pos - 1;
 	if(strncmp(positionPtr, "(",1) == 0) {
 		return TOK_LPAREN;
@@ -293,13 +307,11 @@ tokenType checkForSymbols() {
 		return TOK_ERROR;
 	}
 	
-
-
 }
 
+// Checks for arithmetic operators or comparators
 tokenType checkForOperators() {
 
-	//printf("checking for operators\n");
 	char *positionPtr = source + pos - 1;
 	if(strncmp(positionPtr, "+",1) == 0) {
 		return TOK_PLUS;
@@ -331,19 +343,22 @@ tokenType checkForOperators() {
 
 
 
-
+// If a keyword is identified pos must skip the rest of the characters that compose that keyword to be able to get the next one. 
 void skipKeyWordPos(int length) {
 	for(int i = 0; i < length - 1; i++ ) {
 		pos++;
+		col++;
 	}
 }
 
+
 // Helper function to get indentifiers and KeyWords
 token_t *identifiersAndKeyWords(int initialPos) {
-	//printf("doing keywords and identifiers\n");
+	
+	// Checks for keywords
 	tokenType type = checkForKeyWords(); 
 	if(type != TOK_ERROR) {
-
+		// If keyword skipWord in source and make token
 		int skipAmount = enumMap(type);
 		skipKeyWordPos(skipAmount);
 		return createToken(type, initialPos);	
@@ -351,25 +366,25 @@ token_t *identifiersAndKeyWords(int initialPos) {
 		while(isalpha(peekNextChar()) || peekNextChar() == '_') {
 			getNextChar();
 		}
-		//printf("creating identifier\n");
+		// Else makes an identifier
 		return createToken(TOK_IDENTIFIER, initialPos); 
 	}
 }
 
 
-
+// Gets the next Token in the file. 
 
 token_t *getNextToken() {
-	//printf("begining search for next token\n");
-	// Sets initial POS and gets that char
-
+	
+	// Sets initial POS and gets the char
 	char currChar = getNextChar(); 
 	int initialPos = pos-1;
-	//printf("%d\n", currChar);
+	
+	// Checks for EOF
 	if(currChar == 0) {
 		return createToken(TOK_EOF, initialPos);	
 	}
-	//printf("checking if digit\n");
+	
 	// Checks whether currChar is a digits or currChar is 
 	if(isdigit(currChar)) {
 
@@ -407,24 +422,32 @@ token_t *getNextToken() {
 	} 
 
 	else {
+		// Checks for Symbols and returns symbol if not TOK_ERROR
 		tokenType type = checkForSymbols();
 		if(type != TOK_ERROR) {
 			return createToken(type, initialPos);
 		}
 		type = checkForOperators();
+		
+		// Checks for Operators and returns symbol if not TOK_ERROR
 		if(type != TOK_ERROR) {
 			return createToken(type, initialPos);
 		}
 
 	}
-
+	// Returns TOK_ERROR if all else fails 
 	return createToken(TOK_ERROR, initialPos);
 }
 
 
+void closeScanaer() {
+	free(source);
+}
+
+// Initiates Global variables
 void initScanner(const char *filename) {
 
-
+	// Open's file and checks and error handeling
 	FILE *fp = fopen(filename, "r");
 
 	if(fp == NULL) {
@@ -432,11 +455,12 @@ void initScanner(const char *filename) {
 		exit(EXIT_FAILURE);		
 	}
 
-	
+	// Finds length of fp
 	fseek(fp, 0, SEEK_END);
-	length = ftell(fp); // Finds length of fp
+	length = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
+	// Allocates memory to store contents of fp and error handeling
 	source = (char *) malloc(length+1); 
 
 	if(source == NULL) {
@@ -444,9 +468,11 @@ void initScanner(const char *filename) {
 		exit(EXIT_FAILURE);
 	}
 
+	// Copies contents of fp into source
 	fread(source, 1, length, fp);
-
 	source[length] = '\0';
+	
+	// Close file
 	fclose(fp);
 }
 
@@ -457,11 +483,6 @@ int main(int argc, char* argv[]) {
 	
 	
 	initScanner(argv[1]);
-
-
-	//for(int i = 0; source[i] != '\0'; i++) {
-	//	printf("%c", source[i]);
-	//}
 	
 	token_t *token = getNextToken();
 
