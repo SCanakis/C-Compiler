@@ -4,7 +4,8 @@
 
 typedef enum {
 	TOK_INT, // keyword: int
-	TOK_FLOAT, // keyword: floats
+	TOK_FLOAT, // keyword: float
+	TOK_CHAR, // keyword: char
 	TOK_RETURN, //  keyword: return
 	TOK_IF,	// keyword: if
 	TOK_ELSE, // keyword: else
@@ -14,11 +15,8 @@ typedef enum {
 	TOK_INT_NUMBER, // 123
 	TOK_FLOAT_NUMBER, // 1.23
 	TOK_ASSIGN, // =
-	TOK_EQ, // == 
 	TOK_LT, // <
 	TOK_GT,	// >
-	TOK_LTE, // <=
-	TOK_GTE, // >=
 	TOK_PLUS, // +
 	TOK_MINUS, // -
 	TOK_STAR, // *
