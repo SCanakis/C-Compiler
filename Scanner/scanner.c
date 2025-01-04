@@ -418,7 +418,7 @@ token_t *getNextToken() {
 
 	}
 
-	return NULL;
+	return createToken(TOK_ERROR, initialPos);
 }
 
 
