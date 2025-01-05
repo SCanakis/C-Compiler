@@ -56,7 +56,7 @@ char * printType(tokenType type) {
 		case TOK_COMMA: return "TOK_COMMA";
 		case TOK_EOF: return "TOK_EOF";
 		case TOK_ERROR: return "TOK_ERROR";
-	
+		default: return "TOK_ERROR";	
 	}
 
 }
@@ -347,7 +347,7 @@ tokenType checkForOperators() {
 void skipKeyWordPos(int length) {
 	for(int i = 0; i < length - 1; i++ ) {
 		pos++;
-		col++;
+		column++;
 	}
 }
 
@@ -359,7 +359,7 @@ token_t *identifiersAndKeyWords(int initialPos) {
 	tokenType type = checkForKeyWords(); 
 	if(type != TOK_ERROR) {
 		// If keyword skipWord in source and make token
-		int skipAmount = enumMap(type);
+		int skipAmount = keywordMap(type);
 		skipKeyWordPos(skipAmount);
 		return createToken(type, initialPos);	
 	} else {
@@ -445,7 +445,7 @@ void closeScanaer() {
 }
 
 // Initiates Global variables
-void initScanner(const char *filename) {
+char* initScanner(const char *filename) {
 
 	// Open's file and checks and error handeling
 	FILE *fp = fopen(filename, "r");
@@ -474,11 +474,12 @@ void initScanner(const char *filename) {
 	
 	// Close file
 	fclose(fp);
+	return source;
 }
 
 
 
-
+/*
 int main(int argc, char* argv[]) {
 	
 	
@@ -496,3 +497,6 @@ int main(int argc, char* argv[]) {
 
 	free(source);
 }
+
+*/
+

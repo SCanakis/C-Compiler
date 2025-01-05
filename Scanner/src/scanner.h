@@ -45,7 +45,7 @@ typedef struct token_s {
 
 token_t *getNextToken();
 
-void initScanner(const char *filename);
+char* initScanner(const char *filename);
 
 void closeScanner();
 
