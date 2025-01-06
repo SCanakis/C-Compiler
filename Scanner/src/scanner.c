@@ -204,9 +204,9 @@ int keywordMap(tokenType type) {
 
 	switch(type) {
 		// Should be a space in between this and another character
-		case TOK_INT: return 4;
-		case TOK_FLOAT: return 6;
-		case TOK_CHAR: return 5;
+		case TOK_INT: return 3;
+		case TOK_FLOAT: return 5;
+		case TOK_CHAR: return 4;
 		
 		// Not neccesarlly
 		case TOK_RETURN: return 6;
@@ -227,13 +227,13 @@ tokenType checkForKeyWords() {
 	char *positionPtr = source + pos - 1;
 	int length;
 	// Require a space between the keyword and another character
-	if(strncmp(positionPtr, "int ",4) == 0) {
+	if(strncmp(positionPtr, "int ",4) == 0 || strncmp(positionPtr, "int\n",4) == 0) {
 		return TOK_INT;
 	}
-	if(strncmp(positionPtr, "char ", 5) == 0) {
+	if(strncmp(positionPtr, "char ", 5) == 0 || strncmp(positionPtr, "char\n", 5) == 0) {
 		return TOK_CHAR;
 	}	
-	if(strncmp(positionPtr, "float ", 6) == 0) {
+	if(strncmp(positionPtr, "float ", 6) == 0 || strncmp(positionPtr, "float\n",6) == 0) {
 		return TOK_FLOAT;
 	}
 

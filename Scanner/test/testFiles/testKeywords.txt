@@ -1,0 +1,8 @@
+int
+float
+char
+return;
+if(
+else(
+for(
+while (
