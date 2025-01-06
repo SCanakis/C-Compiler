@@ -17,7 +17,7 @@ static void test_scanner_init(void **state) {
 	char *expected = "I am initting the scanner!\n\nThis is the end of the file.\n\0";
 	char *result = initScanner(filename);	
 	assert_string_equal(result, expected);
-	void closeScanner();
+	closeScanner();
 }
 
 token_t *make_token(tokenType type, char *lexeme) {
@@ -124,14 +124,42 @@ static void test_keywords(void **state) {
 
 	assert_int_equal(eof->type, TOK_EOF);
 	printf("[EOF TEST PASSED]\n");
+
+	closeScanner();
 }
 
+static void test_identifiers(void **state) {
 
+	// SETUP:
+	(void)state;
+
+	char cwd[1024];
+	getcwd(cwd,sizeof(cwd));
+	char *filename = strcat(cwd, "/test/testFiles/testIdentifier.txt");
+
+	printf("%s\n", filename);	
+	token_t *identifier_token = make_token(TOK_IDENTIFIER, "thisIsAnIdentifier");
+
+	// INVOKE:
+	initScanner(filename);
+	
+	token_t *identifier_token_real = getNextToken();
+	printf("%s\n", identifier_token_real->lexeme);
+	// ASSERT: 
+
+	assert_string_equal(identifier_token->lexeme, identifier_token_real->lexeme);
+	assert_int_equal(identifier_token->type, identifier_token_real->type);
+	token_t *eof = getNextToken();
+
+	assert_int_equal(eof->type, TOK_EOF);
+	closeScanner();
+}
 int main(void) {
 
 	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(test_scanner_init), 
 		cmocka_unit_test(test_keywords),
+		cmocka_unit_test(test_identifiers),
 	};
 
 	return cmocka_run_group_tests(tests, NULL, NULL);

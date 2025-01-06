@@ -354,7 +354,6 @@ void skipKeyWordPos(int length) {
 
 // Helper function to get indentifiers and KeyWords
 token_t *identifiersAndKeyWords(int initialPos) {
-	
 	// Checks for keywords
 	tokenType type = checkForKeyWords(); 
 	if(type != TOK_ERROR) {
@@ -363,8 +362,10 @@ token_t *identifiersAndKeyWords(int initialPos) {
 		skipKeyWordPos(skipAmount);
 		return createToken(type, initialPos);	
 	} else {
-		while(isalpha(peekNextChar()) || peekNextChar() == '_') {
+		char nextChar = peekNextChar();
+		while(	(isalpha(nextChar) && nextChar != '\n') || nextChar == '_') {
 			getNextChar();
+			nextChar = peekNextChar();
 		}
 		// Else makes an identifier
 		return createToken(TOK_IDENTIFIER, initialPos); 
@@ -415,7 +416,7 @@ token_t *getNextToken() {
 		return token;
 
 	// This section should check for: Identifiers and Keywords 
-	} else if (isalpha(currChar) || currChar == '_') {
+	} else if ((isalpha(currChar) && !(isspace(currChar)) )|| currChar == '_') {
 
 		return identifiersAndKeyWords(initialPos);
 		
@@ -440,7 +441,10 @@ token_t *getNextToken() {
 }
 
 
-void closeScanaer() {
+void closeScanner() {
+	column = 0;
+	line = 0;
+	pos = 0;
 	free(source);
 }
 

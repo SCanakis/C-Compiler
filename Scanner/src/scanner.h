@@ -47,7 +47,7 @@ token_t *getNextToken();
 
 char* initScanner(const char *filename);
 
-void closeScanner();
+void closeScanner(void);
 
 
 #endif
