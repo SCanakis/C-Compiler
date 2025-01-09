@@ -52,6 +52,8 @@ char * printType(tokenType type) {
 		case TOK_RPAREN: return "TOK_RPAREN";
 		case TOK_LBRACKET: return "TOK_LBRACKET";
 		case TOK_RBRACKET: return "TOK_RBRACKET";
+		case TOK_LBRACE: return "TOK_LBRACE";
+		case TOK_RBRACE: return "TOK_RBRACE";	
 		case TOK_SEMICOLON: return "TOK_SEMICOLON";
 		case TOK_COMMA: return "TOK_COMMA";
 		case TOK_EOF: return "TOK_EOF";
@@ -77,7 +79,11 @@ char getNextChar() {
 		// Handles Comments
 		if(currChar == '/' && source[pos] == '/') {
 			currChar = skipToNextLine();
-		}
+		} 
+		if(currChar == '/' && source[pos] != '/') {
+			break;
+		} 
+
 		
 		// Handles skipping lines and blank space
 		if(currChar == '\n') {
@@ -293,9 +299,15 @@ tokenType checkForSymbols() {
 		return TOK_RPAREN;
 	}
 	if(strncmp(positionPtr, "{",1) == 0) {
-		return TOK_LBRACKET;
+		return TOK_LBRACE;
 	}
 	if(strncmp(positionPtr, "}",1) == 0) {
+		return TOK_RBRACE;
+	}
+	if(strncmp(positionPtr, "[",1) == 0) {
+		return TOK_LBRACKET;
+	}
+	if(strncmp(positionPtr, "]",1) == 0) {
 		return TOK_RBRACKET;
 	}
 	if(strncmp(positionPtr, ",",1) == 0) {
@@ -362,10 +374,10 @@ token_t *identifiersAndKeyWords(int initialPos) {
 		skipKeyWordPos(skipAmount);
 		return createToken(type, initialPos);	
 	} else {
-		char nextChar = peekNextChar();
-		while(	(isalpha(nextChar) && nextChar != '\n') || nextChar == '_') {
-			getNextChar();
-			nextChar = peekNextChar();
+		char nextChar = source[pos];
+		while(	isalpha(nextChar) || nextChar == '_') {
+			pos++;
+			nextChar = source[pos];
 		}
 		// Else makes an identifier
 		return createToken(TOK_IDENTIFIER, initialPos); 

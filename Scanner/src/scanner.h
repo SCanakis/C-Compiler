@@ -23,8 +23,10 @@ typedef enum {
 	TOK_SLASH, // / 
 	TOK_LPAREN, // (
 	TOK_RPAREN, // )
-	TOK_LBRACKET, // {
-	TOK_RBRACKET, // }
+	TOK_LBRACKET, // [
+	TOK_RBRACKET, // ]
+	TOK_RBRACE, // {
+	TOK_LBRACE, // }
 	TOK_SEMICOLON, // ;
 	TOK_COMMA, // ,
 	TOK_EOF, // end fo file
